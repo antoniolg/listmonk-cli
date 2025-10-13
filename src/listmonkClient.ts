@@ -8,6 +8,7 @@ import {
   ListListsParams,
   MailingList,
   PaginatedResponse,
+  UpdateCampaignArchiveInput,
   UpdateCampaignInput,
 } from "./types.js";
 
@@ -95,6 +96,33 @@ export class ListmonkClient {
       {
         method: "PUT",
         body: JSON.stringify({ status }),
+      },
+    );
+
+    return response.data;
+  }
+
+  async updateCampaignArchive(
+    id: number,
+    input: UpdateCampaignArchiveInput,
+  ): Promise<boolean> {
+    const payload: Record<string, unknown> = {
+      archive: input.archive,
+    };
+
+    if (input.archiveTemplateId !== undefined) {
+      payload.archive_template_id = input.archiveTemplateId;
+    }
+
+    if (input.archiveMeta !== undefined) {
+      payload.archive_meta = input.archiveMeta;
+    }
+
+    const response = await this.request<ApiResponse<boolean>>(
+      `/api/campaigns/${id}/archive`,
+      {
+        method: "PUT",
+        body: JSON.stringify(payload),
       },
     );
 

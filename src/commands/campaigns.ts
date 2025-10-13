@@ -7,6 +7,7 @@ import type {
   ContentType,
   CreateCampaignInput,
   UpdateCampaignInput,
+  UpdateCampaignArchiveInput,
 } from "../types.js";
 
 const ALLOWED_STATUSES: CampaignStatus[] = [
@@ -186,6 +187,50 @@ export function registerCampaignCommands(program: Command): void {
     });
 
   campaigns
+    .command("archive")
+    .description("Manage public archive settings for a campaign")
+    .argument("<id>", "Campaign identifier", parseInteger)
+    .option("--enable", "Enable public archive for the campaign")
+    .option("--disable", "Disable public archive for the campaign")
+    .option("--template-id <id>", "Archive template ID", parseInteger)
+    .option("--meta <json>", "Archive metadata as JSON")
+    .option("--meta-file <path>", "Read archive metadata JSON from file")
+    .action(async (id: number, options, command) => {
+      await runWithClient(command, async (client) => {
+        if (options.enable && options.disable) {
+          throw new Error("Use either --enable or --disable, not both.");
+        }
+
+        const archiveState =
+          options.enable === true ? true : options.disable === true ? false : undefined;
+
+        if (archiveState === undefined) {
+          throw new Error("Specify --enable or --disable to set the archive state.");
+        }
+
+        const archiveMeta = await resolveArchiveMeta(options);
+
+        const payload: UpdateCampaignArchiveInput = {
+          archive: archiveState,
+        };
+
+        if (options.templateId !== undefined) {
+          payload.archiveTemplateId = options.templateId;
+        }
+
+        if (archiveMeta !== undefined) {
+          payload.archiveMeta = archiveMeta;
+        }
+
+        await client.updateCampaignArchive(id, payload);
+
+        console.log(
+          `Campaign ${id} archive ${archiveState ? "enabled" : "disabled"}.`,
+        );
+      });
+    });
+
+  campaigns
     .command("delete")
     .description("Delete a campaign")
     .argument("<id>", "Campaign identifier", parseInteger)
@@ -269,6 +314,37 @@ async function resolveBody(options: {
   }
 
   return undefined;
+}
+
+async function resolveArchiveMeta(options: {
+  meta?: string;
+  metaFile?: string;
+}): Promise<Record<string, unknown> | undefined> {
+  if (options.meta && options.metaFile) {
+    throw new Error("Provide either --meta or --meta-file, not both.");
+  }
+
+  const raw = options.metaFile
+    ? await readFile(options.metaFile, "utf8")
+    : options.meta;
+
+  if (raw === undefined) {
+    return undefined;
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown JSON parse error";
+    throw new Error(`Failed to parse archive metadata JSON: ${message}.`);
+  }
+
+  if (parsed === null || Array.isArray(parsed) || typeof parsed !== "object") {
+    throw new Error("Archive metadata must be a JSON object.");
+  }
+
+  return parsed as Record<string, unknown>;
 }
 
 function assertOneOf<T extends string>(

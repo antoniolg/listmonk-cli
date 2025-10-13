@@ -76,6 +76,12 @@ export interface UpdateCampaignStatusRequest {
   status: CampaignStatus;
 }
 
+export interface UpdateCampaignArchiveInput {
+  archive: boolean;
+  archiveTemplateId?: number;
+  archiveMeta?: Record<string, unknown>;
+}
+
 export interface ListListsParams {
   page?: number;
   perPage?: number;
