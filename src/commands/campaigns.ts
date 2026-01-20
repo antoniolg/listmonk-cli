@@ -178,7 +178,10 @@ export function registerCampaignCommands(program: Command): void {
     .option("--type <type>", "Campaign type (regular, optin)")
     .option("--tags <tags...>", "Tags to assign to the campaign")
     .option("--template-id <id>", "Template ID", parseInteger)
-    .option("--send-at <iso>", "Schedule timestamp in ISO-8601 format")
+    .option(
+      "--send-at <iso>",
+      "Schedule timestamp in ISO-8601 format (auto-fills lists if omitted)",
+    )
     .action(async (id: number, options, command) => {
       await runWithClient(command, async (client) => {
         const payload: UpdateCampaignInput = {};
@@ -216,6 +219,18 @@ export function registerCampaignCommands(program: Command): void {
           payload.sendAt = options.sendAt;
         }
 
+        if (payload.sendAt !== undefined && payload.lists === undefined) {
+          const campaign = await client.getCampaign(id);
+          const listIds =
+            campaign.lists?.map((list) => list.id).filter(Boolean) ?? [];
+          if (listIds.length === 0) {
+            throw new Error(
+              "Campaign has no lists assigned; please pass --lists explicitly.",
+            );
+          }
+          payload.lists = listIds;
+        }
+
         const body = await resolveBody(options);
         if (body !== undefined) {
           payload.body = body;
@@ -238,7 +253,10 @@ export function registerCampaignCommands(program: Command): void {
     .description("Schedule or change the status of a campaign")
     .argument("<id>", "Campaign identifier", parseInteger)
     .option("--status <status>", "Target status (default: scheduled)")
-    .option("--send-at <iso>", "Schedule timestamp in ISO-8601 format")
+    .option(
+      "--send-at <iso>",
+      "Schedule timestamp in ISO-8601 format (auto-fills lists if omitted)",
+    )
     .action(async (id: number, options, command) => {
       await runWithClient(command, async (client) => {
         const status: CampaignStatus = options.status ?? "scheduled";
@@ -249,7 +267,18 @@ export function registerCampaignCommands(program: Command): void {
         }
 
         if (options.sendAt) {
-          await client.updateCampaign(id, { sendAt: options.sendAt });
+          const campaign = await client.getCampaign(id);
+          const listIds =
+            campaign.lists?.map((list) => list.id).filter(Boolean) ?? [];
+          if (listIds.length === 0) {
+            throw new Error(
+              "Campaign has no lists assigned; please pass --lists via update before scheduling.",
+            );
+          }
+          await client.updateCampaign(id, {
+            sendAt: options.sendAt,
+            lists: listIds,
+          });
         }
 
         const updated = await client.updateCampaignStatus(id, status);

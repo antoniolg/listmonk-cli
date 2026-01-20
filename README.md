@@ -78,6 +78,9 @@ node dist/index.js campaigns create \
 node dist/index.js campaigns update 42 \
   --subject "Nueva versión del subject" \
   --send-at "2024-04-20T20:00:00Z"
+
+Nota: si Listmonk requiere listas al actualizar `send_at`, el CLI las obtiene del
+campaign automáticamente si no pasas `--lists`.
 ```
 
 #### Programar/enviar campaña
