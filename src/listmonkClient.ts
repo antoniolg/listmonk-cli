@@ -6,6 +6,7 @@ import {
   CampaignStatus,
   CreateCampaignInput,
   ListListsParams,
+  ListCampaignsParams,
   MailingList,
   PaginatedResponse,
   UpdateCampaignArchiveInput,
@@ -55,6 +56,24 @@ export class ListmonkClient {
     const query = searchParams.toString();
     const response = await this.request<ApiResponse<PaginatedResponse<MailingList>>>(
       `/api/lists${query ? `?${query}` : ""}`,
+      {
+        method: "GET",
+      },
+    );
+
+    return response.data;
+  }
+
+  async listCampaigns(
+    params: ListCampaignsParams = {},
+  ): Promise<PaginatedResponse<Campaign>> {
+    const searchParams = new URLSearchParams();
+    if (params.page) searchParams.set("page", String(params.page));
+    if (params.perPage) searchParams.set("per_page", String(params.perPage));
+
+    const query = searchParams.toString();
+    const response = await this.request<ApiResponse<PaginatedResponse<Campaign>>>(
+      `/api/campaigns${query ? `?${query}` : ""}`,
       {
         method: "GET",
       },

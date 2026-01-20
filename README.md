@@ -53,6 +53,12 @@ node dist/index.js --help
 node dist/index.js lists --page 1 --per-page 20
 ```
 
+#### Listar campañas
+
+```bash
+node dist/index.js campaigns list --page 1 --per-page 20 --status scheduled
+```
+
 #### Crear campaña
 
 ```bash

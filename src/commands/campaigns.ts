@@ -91,6 +91,79 @@ export function registerCampaignCommands(program: Command): void {
     });
 
   campaigns
+    .command("list")
+    .description("List campaigns")
+    .option("--page <page>", "Page number", parseInteger)
+    .option("--per-page <size>", "Items per page", parseInteger)
+    .option("--status <status>", "Filter by status")
+    .option("--type <type>", "Filter by campaign type (regular, optin)")
+    .option("--name <name>", "Filter by campaign name (substring match)")
+    .option("--query <query>", "Filter by name or subject (substring match)")
+    .action(async (options, command) => {
+      await runWithClient(command, async (client) => {
+        const response = await client.listCampaigns({
+          page: options.page,
+          perPage: options.perPage,
+        });
+
+        let results = response.results;
+
+        if (options.status) {
+          const status = options.status as CampaignStatus;
+          if (!ALLOWED_STATUSES.includes(status)) {
+            throw new Error(
+              `Invalid status "${options.status}". Allowed values: ${ALLOWED_STATUSES.join(", ")}`,
+            );
+          }
+          results = results.filter((campaign) => campaign.status === status);
+        }
+
+        if (options.type) {
+          const type = options.type as CampaignType;
+          assertOneOf("campaign type", type, ALLOWED_CAMPAIGN_TYPES);
+          results = results.filter((campaign) => campaign.type === type);
+        }
+
+        if (options.name) {
+          const needle = String(options.name).toLowerCase();
+          results = results.filter((campaign) =>
+            campaign.name.toLowerCase().includes(needle),
+          );
+        }
+
+        if (options.query) {
+          const needle = String(options.query).toLowerCase();
+          results = results.filter((campaign) => {
+            const name = campaign.name.toLowerCase();
+            const subject = campaign.subject?.toLowerCase() ?? "";
+            return name.includes(needle) || subject.includes(needle);
+          });
+        }
+
+        if (results.length === 0) {
+          console.log("No campaigns found.");
+          return;
+        }
+
+        console.table(
+          results.map((campaign) => ({
+            id: campaign.id,
+            name: campaign.name,
+            status: campaign.status ?? "",
+            type: campaign.type ?? "",
+            send_at: campaign.send_at ?? "",
+            lists: campaign.lists?.length ?? 0,
+          })),
+        );
+
+        const totalPages = Math.ceil(response.total / response.per_page);
+        console.log(
+          `Page ${response.page} / ${totalPages} • Total: ${response.total} • Showing: ${results.length}`,
+        );
+      });
+    });
+
+  campaigns
     .command("update")
     .description("Update an existing campaign")
     .argument("<id>", "Campaign identifier", parseInteger)

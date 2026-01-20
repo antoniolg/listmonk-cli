@@ -88,3 +88,8 @@ export interface ListListsParams {
   query?: string;
   tag?: string;
 }
+
+export interface ListCampaignsParams {
+  page?: number;
+  perPage?: number;
+}
