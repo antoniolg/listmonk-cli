@@ -2,6 +2,9 @@
 import { Command } from "commander";
 import { registerCampaignCommands } from "./commands/campaigns.js";
 import { registerListCommands } from "./commands/lists.js";
+import { registerSubscriberCommands } from "./commands/subscribers.js";
+import { registerTemplateCommands } from "./commands/templates.js";
+import { registerTransactionalCommands } from "./commands/transactional.js";
 import { ConfigError } from "./config.js";
 import { ListmonkApiError } from "./listmonkClient.js";
 
@@ -27,6 +30,9 @@ program
 
 registerListCommands(program);
 registerCampaignCommands(program);
+registerSubscriberCommands(program);
+registerTemplateCommands(program);
+registerTransactionalCommands(program);
 
 void program.parseAsync(process.argv).catch((error) => {
   if (handleKnownTopLevelError(error)) {

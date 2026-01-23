@@ -1,110 +1,145 @@
 ## Listmonk CLI
 
-CLI en TypeScript para gestionar campañas (newsletters) y listas en Listmonk.
+TypeScript CLI to manage Listmonk campaigns (newsletters) and lists.
 
-### Requisitos
+### Requirements
 
-- Node.js 18.17 o superior
-- `npm` o `pnpm`
-- Credenciales de la API de Listmonk (usuario y API key) con permisos para campañas y listas
+- Node.js 18.17 or newer
+- `npm` or `pnpm`
+- Listmonk API credentials (username + API key) with campaign and list permissions
 
-### Instalación
+### Installation
 
 ```bash
 npm install
 ```
 
-Esto descarga las dependencias, incluida `typescript`. Luego compila con:
+This installs dependencies, including `typescript`. Then build:
 
 ```bash
 npm run build
 ```
 
-El binario generado queda en `dist/index.js` y se puede ejecutar como `node dist/index.js …`.  
-Para añadirlo a tu PATH puedes usar `npm link` o ejecutar el script con `npx`.
+The compiled binary lives at `dist/index.js` and can be run as `node dist/index.js …`.  
+To add it to your PATH, use `npm link` or run it via `npx`.
 
-### Configuración
+### Configuration
 
-El CLI busca la configuración en variables de entorno o en parámetros de línea:
+The CLI reads configuration from environment variables or CLI flags:
 
-- `LISTMONK_BASE_URL` – URL base del servidor (`https://tu-servidor`).
-- `LISTMONK_USERNAME` – Usuario API (por defecto `api`).
-- `LISTMONK_API_KEY` – API key o contraseña del usuario.
-- `LISTMONK_TIMEOUT` – Timeout en ms (opcional, por defecto 30000).
-- `LISTMONK_RETRY_COUNT` – Reintentos ante errores transitorios (opcional, por defecto 3).
+- `LISTMONK_BASE_URL` – Base URL (`https://your-server`).
+- `LISTMONK_USERNAME` – API username (default: `api`).
+- `LISTMONK_API_KEY` – API key or password.
+- `LISTMONK_TIMEOUT` – Timeout in ms (optional, default 30000).
+- `LISTMONK_RETRY_COUNT` – Retry count for transient errors (optional, default 3).
 
-Puedes sobreescribir estos valores en cada comando:
+You can override these per command:
 
 ```bash
-listmonk --base-url https://tu-servidor --api-key xxx campaigns list
+listmonk --base-url https://your-server --api-key xxx campaigns list
 ```
 
-### Uso
+### Usage
 
-Consulta la ayuda general:
+General help:
 
 ```bash
 node dist/index.js --help
 ```
 
-#### Listas
+#### Lists
 
 ```bash
 node dist/index.js lists --page 1 --per-page 20
 ```
 
-#### Listar campañas
+#### Templates
+
+```bash
+node dist/index.js templates list
+```
+
+Filter by type or name:
+
+```bash
+node dist/index.js templates list --type tx --query welcome
+```
+
+#### Subscribers
+
+```bash
+node dist/index.js subscribers create \\
+  --email "user@example.com" \\
+  --name "User Name" \\
+  --lists 1 2 \\
+  --preconfirm-subscriptions
+```
+
+#### List campaigns
 
 ```bash
 node dist/index.js campaigns list --page 1 --per-page 20 --status scheduled
 ```
 
-#### Crear campaña
+#### Create campaign
 
 ```bash
 node dist/index.js campaigns create \
-  --name "Newsletter abril" \
-  --subject "Novedades de abril" \
+  --name "April newsletter" \
+  --subject "April updates" \
   --lists 1 2 \
-  --body-file contenido.html \
-  --from-email "equipo@ejemplo.com" \
+  --body-file content.html \
+  --from-email "team@example.com" \
   --content-type html \
-  --tags mensual destacados
+  --tags monthly highlights
 ```
 
-#### Actualizar campaña
+#### Update campaign
 
 ```bash
 node dist/index.js campaigns update 42 \
-  --subject "Nueva versión del subject" \
+  --subject "Updated subject" \
   --send-at "2024-04-20T20:00:00Z"
 
-Nota: si Listmonk requiere listas al actualizar `send_at`, el CLI las obtiene del
-campaign automáticamente si no pasas `--lists`.
+Note: if Listmonk requires `lists` when updating `send_at`, the CLI auto-fills
+them from the existing campaign unless you pass `--lists`.
 ```
 
-#### Programar/enviar campaña
+#### Schedule/send campaign
 
 ```bash
 node dist/index.js campaigns schedule 42 --status scheduled --send-at "2024-04-20T20:00:00Z"
 ```
 
-#### Eliminar campaña
+#### Delete campaign
 
 ```bash
 node dist/index.js campaigns delete 42
 ```
 
-### Depuración
+#### Send transactional email
 
-Establece `DEBUG=1` para que en errores de la API se muestre el payload completo del servidor:
+```bash
+node dist/index.js tx send \
+  --subscriber-email "user@example.com" \
+  --template-id 12 \
+  --data '{"name":"Antonio","topic":"Arquitectura"}'
+```
+
+You can also use `--subscriber-id`, `--template-name`, `--data-file`, and
+optionally set `--headers` (JSON array), `--headers-file`, `--messenger`, or
+`--content-type`.
+
+### Debugging
+
+Set `DEBUG=1` to show full API payloads on errors:
 
 ```bash
 DEBUG=1 node dist/index.js campaigns create …
 ```
 
-### Próximos pasos sugeridos
+### Suggested next steps
 
-- Añadir más comandos (suscriptores, plantillas) reutilizando el cliente HTTP.
-- Incorporar pruebas automatizadas y validaciones adicionales en los comandos.
-- Empaquetar el CLI como paquete npm para instalación global sencilla.
+- Add more commands (subscribers, templates) using the HTTP client.
+- Add automated tests and validation.
+- Package the CLI as an npm package for global install.

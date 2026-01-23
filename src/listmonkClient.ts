@@ -4,13 +4,17 @@ import {
   ApiResponse,
   Campaign,
   CampaignStatus,
+  CreateSubscriberInput,
   CreateCampaignInput,
   ListListsParams,
   ListCampaignsParams,
   MailingList,
   PaginatedResponse,
+  Template,
   UpdateCampaignArchiveInput,
+  TransactionalMessageInput,
   UpdateCampaignInput,
+  Subscriber,
 } from "./types.js";
 
 const DEFAULT_BACKOFF_MS = 250;
@@ -76,6 +80,32 @@ export class ListmonkClient {
       `/api/campaigns${query ? `?${query}` : ""}`,
       {
         method: "GET",
+      },
+    );
+
+    return response.data;
+  }
+
+  async listTemplates(): Promise<Template[]> {
+    const response = await this.request<ApiResponse<Template[]>>(
+      "/api/templates",
+      {
+        method: "GET",
+      },
+    );
+
+    return response.data;
+  }
+
+  async createSubscriber(
+    input: CreateSubscriberInput,
+  ): Promise<Subscriber> {
+    const payload = this.toSubscriberPayload(input);
+    const response = await this.request<ApiResponse<Subscriber>>(
+      "/api/subscribers",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
       },
     );
 
@@ -154,6 +184,18 @@ export class ListmonkClient {
     });
   }
 
+  async sendTransactionalEmail(
+    input: TransactionalMessageInput,
+  ): Promise<boolean> {
+    const payload = this.toTransactionalPayload(input);
+    const response = await this.request<ApiResponse<boolean>>("/api/tx", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+
+    return response.data ?? true;
+  }
+
   async getCampaign(id: number): Promise<Campaign> {
     const response = await this.request<ApiResponse<Campaign>>(
       `/api/campaigns/${id}`,
@@ -180,6 +222,61 @@ export class ListmonkClient {
     if (input.tags !== undefined) payload.tags = input.tags;
     if (input.templateId !== undefined) payload.template_id = input.templateId;
     if (input.sendAt !== undefined) payload.send_at = input.sendAt;
+
+    return payload;
+  }
+
+  private toTransactionalPayload(
+    input: TransactionalMessageInput,
+  ): Record<string, unknown> {
+    const payload: Record<string, unknown> = {};
+
+    if (input.subscriberEmail !== undefined) {
+      payload.subscriber_email = input.subscriberEmail;
+    }
+    if (input.subscriberId !== undefined) {
+      payload.subscriber_id = input.subscriberId;
+    }
+    if (input.templateId !== undefined) {
+      payload.template_id = input.templateId;
+    }
+    if (input.templateName !== undefined) {
+      payload.template_name = input.templateName;
+    }
+    if (input.data !== undefined) {
+      payload.data = input.data;
+    }
+    if (input.headers !== undefined) {
+      payload.headers = input.headers;
+    }
+    if (input.messenger !== undefined) {
+      payload.messenger = input.messenger;
+    }
+    if (input.contentType !== undefined) {
+      payload.content_type = input.contentType;
+    }
+
+    return payload;
+  }
+
+  private toSubscriberPayload(
+    input: CreateSubscriberInput,
+  ): Record<string, unknown> {
+    const payload: Record<string, unknown> = {
+      email: input.email,
+      name: input.name,
+      status: input.status,
+    };
+
+    if (input.lists !== undefined) {
+      payload.lists = input.lists;
+    }
+    if (input.attribs !== undefined) {
+      payload.attribs = input.attribs;
+    }
+    if (input.preconfirmSubscriptions !== undefined) {
+      payload.preconfirm_subscriptions = input.preconfirmSubscriptions;
+    }
 
     return payload;
   }
