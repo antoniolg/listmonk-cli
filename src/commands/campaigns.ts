@@ -5,6 +5,7 @@ import type {
   CampaignStatus,
   CampaignType,
   ContentType,
+  Campaign,
   CreateCampaignInput,
   UpdateCampaignInput,
   UpdateCampaignArchiveInput,
@@ -160,6 +161,31 @@ export function registerCampaignCommands(program: Command): void {
         console.log(
           `Page ${response.page} / ${totalPages} • Total: ${response.total} • Showing: ${results.length}`,
         );
+      });
+    });
+
+  campaigns
+    .command("get")
+    .description("Fetch a campaign and print its content")
+    .argument("<id>", "Campaign identifier", parseInteger)
+    .option("--json", "Output the raw campaign JSON")
+    .option("--body-only", "Print only the campaign body (for piping)")
+    .action(async (id: number, options, command) => {
+      await runWithClient(command, async (client) => {
+        if (options.json && options.bodyOnly) {
+          throw new Error("Use either --json or --body-only, not both.");
+        }
+
+        const campaign = await client.getCampaign(id);
+
+        if (options.bodyOnly) {
+          process.stdout.write(campaign.body ?? "");
+          return;
+        }
+
+        const output = formatCampaignOutput(campaign, { json: options.json });
+        process.stdout.write(output);
+        if (!output.endsWith("\n")) process.stdout.write("\n");
       });
     });
 
@@ -350,6 +376,40 @@ function parseInteger(value: string): number {
     throw new Error(`Expected a number but received "${value}".`);
   }
   return parsed;
+}
+
+export function formatCampaignOutput(
+  campaign: Campaign,
+  options: { json?: boolean } = {},
+): string {
+  if (options.json) {
+    return `${JSON.stringify(campaign, null, 2)}\n`;
+  }
+
+  const listIds =
+    campaign.lists?.map((list) => list.id).filter((id) => typeof id === "number") ??
+    [];
+
+  const lines: string[] = [];
+  lines.push(`ID: ${campaign.id}`);
+  lines.push(`Name: ${campaign.name}`);
+  lines.push(`Subject: ${campaign.subject}`);
+  if (campaign.status) lines.push(`Status: ${campaign.status}`);
+  if (campaign.type) lines.push(`Type: ${campaign.type}`);
+  if (campaign.messenger) lines.push(`Messenger: ${campaign.messenger}`);
+  if (campaign.content_type) lines.push(`Content-Type: ${campaign.content_type}`);
+  if (campaign.from_email) lines.push(`From: ${campaign.from_email}`);
+  if (campaign.send_at) lines.push(`Send-At: ${campaign.send_at}`);
+  if (listIds.length > 0) lines.push(`Lists: ${listIds.join(", ")}`);
+  if (campaign.tags && campaign.tags.length > 0) {
+    lines.push(`Tags: ${campaign.tags.join(", ")}`);
+  }
+
+  lines.push("");
+  lines.push("--- BODY ---");
+  lines.push(campaign.body ?? "");
+
+  return `${lines.join("\n")}\n`;
 }
 
 function parseIntegerList(value: unknown, label: string): number[] {

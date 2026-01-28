@@ -81,6 +81,24 @@ node dist/index.js subscribers create \\
 node dist/index.js campaigns list --page 1 --per-page 20 --status scheduled
 ```
 
+#### Get campaign (view content)
+
+```bash
+node dist/index.js campaigns get 42
+```
+
+Body only (useful for piping):
+
+```bash
+node dist/index.js campaigns get 42 --body-only
+```
+
+Raw JSON:
+
+```bash
+node dist/index.js campaigns get 42 --json
+```
+
 #### Create campaign
 
 ```bash
