@@ -10,6 +10,7 @@ export function registerListCommands(program: Command): void {
     .option("--per-page <size>", "Items per page", parseInteger)
     .option("--query <query>", "Filter by name or description")
     .option("--tag <tag>", "Filter by tag")
+    .option("--json", "Output the raw list JSON")
     .action(async (options, command) => {
       await runWithClient(command, async (client) => {
         const params: ListListsParams = {
@@ -20,6 +21,11 @@ export function registerListCommands(program: Command): void {
         };
 
         const response = await client.listLists(params);
+
+        if (options.json) {
+          process.stdout.write(`${JSON.stringify(response, null, 2)}\n`);
+          return;
+        }
 
         if (response.results.length === 0) {
           console.log("No lists found.");

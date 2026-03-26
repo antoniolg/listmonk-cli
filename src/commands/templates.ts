@@ -19,6 +19,7 @@ export function registerTemplateCommands(program: Command): void {
     .option("--type <type>", "Filter by template type")
     .option("--name <name>", "Filter by template name (substring match)")
     .option("--query <query>", "Filter by name or subject (substring match)")
+    .option("--json", "Output the filtered template JSON")
     .action(async (options, command) => {
       await runWithClient(command, async (client) => {
         const response = await client.listTemplates();
@@ -48,6 +49,13 @@ export function registerTemplateCommands(program: Command): void {
 
         if (results.length === 0) {
           console.log("No templates found.");
+          return;
+        }
+
+        if (options.json) {
+          process.stdout.write(
+            `${JSON.stringify({ results, total: results.length }, null, 2)}\n`,
+          );
           return;
         }
 

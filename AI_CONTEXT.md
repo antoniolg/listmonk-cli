@@ -41,6 +41,55 @@ listmonk <comando> [opciones]
   listmonk lists --query "weekly" --tag "marketing"
   ```
 
+- JSON para automatizaciones:
+
+  ```bash
+  listmonk lists --query "AI Expert" --json
+  ```
+
+### Suscriptores
+
+- Crear un suscriptor:
+
+  ```bash
+  listmonk subscribers create \
+    --email "user@example.com" \
+    --name "User Name" \
+    --lists 19 \
+    --preconfirm-subscriptions
+  ```
+
+- Listar o buscar suscriptores:
+
+  ```bash
+  listmonk subscribers list --list-id 19 --per-page 100
+  listmonk subscribers list --email "user@example.com" --json
+  listmonk subscribers list --name "Juan Pablo"
+  ```
+
+- Obtener un suscriptor concreto:
+
+  ```bash
+  listmonk subscribers get 7449
+  listmonk subscribers get 7449 --json
+  ```
+
+- Actualizar un suscriptor:
+
+  ```bash
+  listmonk subscribers update 7449 \
+    --name "Juan Pablo Vivas Reinoso" \
+    --lists 19 \
+    --attribs '{"cohort":"may-2026"}'
+  ```
+
+- Añadir o quitar de una lista:
+
+  ```bash
+  listmonk subscribers add-to-list 7449 --list 19
+  listmonk subscribers remove-from-list 7449 --list 16
+  ```
+
 ### Campañas
 
 - Crear una campaña apuntando a listas 1 y 2:
@@ -68,6 +117,12 @@ listmonk <comando> [opciones]
   listmonk campaigns schedule 42 --status scheduled --send-at "2024-05-01T09:00:00Z"
   ```
 
+- Listado en JSON:
+
+  ```bash
+  listmonk campaigns list --query "AI Expert" --json
+  ```
+
 - Eliminar campaña:
 
   ```bash
@@ -82,6 +137,7 @@ Si se necesita más información sobre cualquier comando, invocar la ayuda gener
 listmonk --help
 listmonk campaigns --help
 listmonk campaigns create --help
+listmonk subscribers --help
 ```
 
 Esto mostrará todas las flags disponibles y descripciones detalladas.

@@ -100,6 +100,7 @@ export function registerCampaignCommands(program: Command): void {
     .option("--type <type>", "Filter by campaign type (regular, optin)")
     .option("--name <name>", "Filter by campaign name (substring match)")
     .option("--query <query>", "Filter by name or subject (substring match)")
+    .option("--json", "Output the filtered campaign JSON")
     .action(async (options, command) => {
       await runWithClient(command, async (client) => {
         const response = await client.listCampaigns({
@@ -143,6 +144,23 @@ export function registerCampaignCommands(program: Command): void {
 
         if (results.length === 0) {
           console.log("No campaigns found.");
+          return;
+        }
+
+        if (options.json) {
+          process.stdout.write(
+            `${JSON.stringify(
+              {
+                results,
+                page: response.page,
+                per_page: response.per_page,
+                total: response.total,
+                shown: results.length,
+              },
+              null,
+              2,
+            )}\n`,
+          );
           return;
         }
 

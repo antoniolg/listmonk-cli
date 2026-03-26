@@ -12,9 +12,11 @@ import {
   PaginatedResponse,
   Template,
   UpdateCampaignArchiveInput,
+  UpdateSubscriberInput,
   TransactionalMessageInput,
   UpdateCampaignInput,
   Subscriber,
+  ListSubscribersParams,
 } from "./types.js";
 
 const DEFAULT_BACKOFF_MS = 250;
@@ -105,6 +107,55 @@ export class ListmonkClient {
       "/api/subscribers",
       {
         method: "POST",
+        body: JSON.stringify(payload),
+      },
+    );
+
+    return response.data;
+  }
+
+  async listSubscribers(
+    params: ListSubscribersParams = {},
+  ): Promise<PaginatedResponse<Subscriber>> {
+    const searchParams = new URLSearchParams();
+    if (params.page) searchParams.set("page", String(params.page));
+    if (params.perPage) searchParams.set("per_page", String(params.perPage));
+    if (params.query) searchParams.set("query", params.query);
+    if (params.listId !== undefined) {
+      searchParams.set("list_id", String(params.listId));
+    }
+
+    const query = searchParams.toString();
+    const response = await this.request<ApiResponse<PaginatedResponse<Subscriber>>>(
+      `/api/subscribers${query ? `?${query}` : ""}`,
+      {
+        method: "GET",
+      },
+    );
+
+    return response.data;
+  }
+
+  async getSubscriber(id: number): Promise<Subscriber> {
+    const response = await this.request<ApiResponse<Subscriber>>(
+      `/api/subscribers/${id}`,
+      {
+        method: "GET",
+      },
+    );
+
+    return response.data;
+  }
+
+  async updateSubscriber(
+    id: number,
+    input: UpdateSubscriberInput,
+  ): Promise<Subscriber> {
+    const payload = this.toSubscriberPayload(input);
+    const response = await this.request<ApiResponse<Subscriber>>(
+      `/api/subscribers/${id}`,
+      {
+        method: "PUT",
         body: JSON.stringify(payload),
       },
     );
@@ -260,13 +311,19 @@ export class ListmonkClient {
   }
 
   private toSubscriberPayload(
-    input: CreateSubscriberInput,
+    input: CreateSubscriberInput | UpdateSubscriberInput,
   ): Record<string, unknown> {
-    const payload: Record<string, unknown> = {
-      email: input.email,
-      name: input.name,
-      status: input.status,
-    };
+    const payload: Record<string, unknown> = {};
+
+    if (input.email !== undefined) {
+      payload.email = input.email;
+    }
+    if (input.name !== undefined) {
+      payload.name = input.name;
+    }
+    if (input.status !== undefined) {
+      payload.status = input.status;
+    }
 
     if (input.lists !== undefined) {
       payload.lists = input.lists;

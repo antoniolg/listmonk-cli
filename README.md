@@ -1,6 +1,6 @@
 ## Listmonk CLI
 
-TypeScript CLI to manage Listmonk campaigns (newsletters) and lists.
+TypeScript CLI to manage Listmonk campaigns, lists, subscribers, templates, and transactional emails.
 
 ### Requirements
 
@@ -51,6 +51,7 @@ node dist/index.js --help
 
 ```bash
 node dist/index.js lists --page 1 --per-page 20
+node dist/index.js lists --query "AI Expert" --json
 ```
 
 #### Templates
@@ -63,6 +64,7 @@ Filter by type or name:
 
 ```bash
 node dist/index.js templates list --type tx --query welcome
+node dist/index.js templates list --type tx --json
 ```
 
 #### Subscribers
@@ -75,10 +77,41 @@ node dist/index.js subscribers create \\
   --preconfirm-subscriptions
 ```
 
+List subscribers:
+
+```bash
+node dist/index.js subscribers list --list-id 19 --per-page 100
+node dist/index.js subscribers list --email "user@example.com" --json
+```
+
+Fetch one subscriber:
+
+```bash
+node dist/index.js subscribers get 7449
+node dist/index.js subscribers get 7449 --json
+```
+
+Update one subscriber:
+
+```bash
+node dist/index.js subscribers update 7449 \
+  --name "Juan Pablo Vivas Reinoso" \
+  --lists 19 \
+  --attribs '{"cohort":"may-2026"}'
+```
+
+Move a subscriber between lists:
+
+```bash
+node dist/index.js subscribers add-to-list 7449 --list 19
+node dist/index.js subscribers remove-from-list 7449 --list 16
+```
+
 #### List campaigns
 
 ```bash
 node dist/index.js campaigns list --page 1 --per-page 20 --status scheduled
+node dist/index.js campaigns list --query "AI Expert" --json
 ```
 
 #### Get campaign (view content)
@@ -156,8 +189,8 @@ Set `DEBUG=1` to show full API payloads on errors:
 DEBUG=1 node dist/index.js campaigns create …
 ```
 
-### Suggested next steps
+### Notes
 
-- Add more commands (subscribers, templates) using the HTTP client.
-- Add automated tests and validation.
-- Package the CLI as an npm package for global install.
+- The executable name is `listmonk`.
+- `lists`, `campaigns list`, `templates list`, `subscribers list`, and `subscribers get` support JSON output for automation.
+- Subscriber management now includes `list`, `get`, `update`, `add-to-list`, and `remove-from-list`.

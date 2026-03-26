@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { formatCampaignOutput } from "../src/commands/campaigns.js";
-import type { Campaign } from "../src/types.js";
+import { formatCampaignOutput } from "../dist/commands/campaigns.js";
+import type { Campaign } from "../src/types.ts";
 
 test("formatCampaignOutput: json mode returns JSON", () => {
   const campaign: Campaign = {
@@ -32,4 +32,3 @@ test("formatCampaignOutput: default includes body section", () => {
   assert.match(out, /--- BODY ---/);
   assert.match(out, /Body text/);
 });
-

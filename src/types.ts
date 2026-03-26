@@ -23,13 +23,21 @@ export interface MailingList {
   updated_at?: string;
 }
 
+export interface SubscriberList extends MailingList {
+  subscription_status?: SubscriptionStatus;
+  subscription_created_at?: string;
+  subscription_updated_at?: string;
+  subscription_meta?: Record<string, unknown>;
+}
+
 export interface Subscriber {
   id?: number;
   uuid?: string;
   email: string;
   name: string;
   status: SubscriberStatus;
-  lists?: MailingList[];
+  attribs?: Record<string, unknown>;
+  lists?: SubscriberList[];
   created_at?: string;
   updated_at?: string;
 }
@@ -37,6 +45,7 @@ export interface Subscriber {
 export type ListType = "public" | "private";
 export type OptinType = "single" | "double";
 export type SubscriberStatus = "enabled" | "blocklisted";
+export type SubscriptionStatus = "confirmed" | "unconfirmed";
 
 export interface Campaign {
   id: number;
@@ -106,6 +115,8 @@ export interface CreateSubscriberInput {
   preconfirmSubscriptions?: boolean;
 }
 
+export type UpdateSubscriberInput = Partial<CreateSubscriberInput>;
+
 export interface UpdateCampaignStatusRequest {
   status: CampaignStatus;
 }
@@ -137,4 +148,11 @@ export interface ListListsParams {
 export interface ListCampaignsParams {
   page?: number;
   perPage?: number;
+}
+
+export interface ListSubscribersParams {
+  page?: number;
+  perPage?: number;
+  query?: string;
+  listId?: number;
 }
