@@ -10,6 +10,15 @@ TypeScript CLI to manage Listmonk campaigns, lists, subscribers, templates, and 
 
 ### Installation
 
+With Homebrew:
+
+```bash
+brew tap antoniolg/tap
+brew install antoniolg/tap/listmonk-cli
+```
+
+From source:
+
 ```bash
 npm install
 ```
@@ -44,14 +53,14 @@ listmonk --base-url https://your-server --api-key xxx campaigns list
 General help:
 
 ```bash
-node dist/index.js --help
+listmonk --help
 ```
 
 #### Lists
 
 ```bash
-node dist/index.js lists --page 1 --per-page 20
-node dist/index.js lists --query "AI Expert" --json
+listmonk lists --page 1 --per-page 20
+listmonk lists --query "AI Expert" --json
 ```
 
 #### Templates
