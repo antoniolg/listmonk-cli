@@ -4,7 +4,6 @@ import {
   buildSubscriberQuery,
   formatSubscriberOutput,
 } from "../dist/commands/subscribers.js";
-import type { Subscriber } from "../src/types.ts";
 
 test("buildSubscriberQuery combines raw query and convenience filters", () => {
   const query = buildSubscriberQuery({
@@ -21,7 +20,7 @@ test("buildSubscriberQuery combines raw query and convenience filters", () => {
 });
 
 test("formatSubscriberOutput json mode returns JSON", () => {
-  const subscriber: Subscriber = {
+  const subscriber = {
     id: 42,
     email: "user@example.com",
     name: "User Example",
@@ -34,7 +33,7 @@ test("formatSubscriberOutput json mode returns JSON", () => {
 });
 
 test("formatSubscriberOutput default includes lists and attribs", () => {
-  const subscriber: Subscriber = {
+  const subscriber = {
     id: 7,
     email: "user@example.com",
     name: "User Example",

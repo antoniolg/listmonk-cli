@@ -1,10 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { formatCampaignOutput } from "../dist/commands/campaigns.js";
-import type { Campaign } from "../src/types.ts";
 
 test("formatCampaignOutput: json mode returns JSON", () => {
-  const campaign: Campaign = {
+  const campaign = {
     id: 42,
     name: "April newsletter",
     subject: "Hello",
@@ -18,7 +17,7 @@ test("formatCampaignOutput: json mode returns JSON", () => {
 });
 
 test("formatCampaignOutput: default includes body section", () => {
-  const campaign: Campaign = {
+  const campaign = {
     id: 1,
     name: "N",
     subject: "S",
