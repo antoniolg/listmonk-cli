@@ -41,7 +41,7 @@ Current CLI version seen here: `0.1.0`
 
 1. List lists/templates/campaigns first. Do not assume IDs from memory.
 2. For newsletter work, create or inspect the campaign via CLI.
-3. For destructive or external actions, get explicit confirmation before:
+3. Require explicit authorization for these destructive or external actions. Reuse approval already given for the same payload, destination, and schedule; reconfirm only after a material change or an explicit fresh-approval requirement. This applies before:
    - scheduling a campaign
    - deleting a campaign
    - sending a transactional email
