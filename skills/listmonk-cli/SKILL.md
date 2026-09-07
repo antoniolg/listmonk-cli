@@ -1,6 +1,6 @@
 ---
 name: listmonk-cli
-description: Use the `listmonk` CLI to inspect lists/templates/campaigns, create or update newsletter campaigns, and send transactional emails. Use when the user asks about Listmonk newsletters, mailing lists, campaign drafts, scheduling, or subscriber operations that may need CLI first and API fallback.
+description: "Inspect and manage Listmonk lists, subscribers, templates, newsletter campaigns, scheduling, and transactional email via CLI."
 ---
 
 # Listmonk CLI
